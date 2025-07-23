@@ -1,8 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
 import router from './routes.js';
 import sequelize from './models/song.model.js';
+import { swaggerSpec } from './swagger.js';
 
 dotenv.config();
 
@@ -20,12 +22,51 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rutas
+// Documentación Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "🎵 API CRUD Canciones - Documentación"
+}));
+
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     tags: [Health]
+ *     summary: Información del microservicio
+ *     description: Retorna información básica del microservicio y enlaces útiles
+ *     responses:
+ *       200:
+ *         description: Información del servicio
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "🎵 Microservicio CRUD Canciones"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 status:
+ *                   type: string
+ *                   example: "activo"
+ *                 documentation:
+ *                   type: string
+ *                   example: "/api-docs"
+ *                 endpoints:
+ *                   type: object
+ */
 app.get('/', (req, res) => {
   res.json({
     message: '🎵 Microservicio CRUD Canciones',
     version: '1.0.0',
     status: 'activo',
+    documentation: '/api-docs',
+    author: 'Alexis Jahir Lapo Cabrera',
+    institution: 'Escuela Politécnica Nacional',
     endpoints: {
       'GET /api/songs': 'Obtener todas las canciones',
       'GET /api/songs/:id': 'Obtener canción por ID',

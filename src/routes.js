@@ -3,7 +3,33 @@ import { Song } from './models/song.model.js';
 
 const router = Router();
 
-// GET /api/songs - Obtener todas las canciones
+/**
+ * @swagger
+ * /api/songs:
+ *   get:
+ *     tags: [Songs]
+ *     summary: Obtener todas las canciones
+ *     description: Retorna una lista completa de todas las canciones almacenadas en la base de datos
+ *     responses:
+ *       200:
+ *         description: Lista de canciones obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Song'
+ *                     count:
+ *                       type: integer
+ *                       example: 10
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.get('/songs', async (req, res) => {
   try {
     const songs = await Song.findAll({
@@ -23,7 +49,38 @@ router.get('/songs', async (req, res) => {
   }
 });
 
-// GET /api/songs/:id - Obtener una canción por ID
+/**
+ * @swagger
+ * /api/songs/{id}:
+ *   get:
+ *     tags: [Songs]
+ *     summary: Obtener una canción por ID
+ *     description: Retorna los detalles de una canción específica usando su identificador único
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID único de la canción
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Canción encontrada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Song'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.get('/songs/:id', async (req, res) => {
   try {
     const song = await Song.findByPk(req.params.id);
@@ -46,7 +103,42 @@ router.get('/songs/:id', async (req, res) => {
   }
 });
 
-// POST /api/songs - Crear nueva canción
+/**
+ * @swagger
+ * /api/songs:
+ *   post:
+ *     tags: [Songs]
+ *     summary: Crear nueva canción
+ *     description: Crea una nueva canción en la base de datos con la información proporcionada
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SongInput'
+ *           example:
+ *             name: "Hotel California"
+ *             path: "https://music.example.com/hotel-california.mp3"
+ *             plays: 0
+ *     responses:
+ *       201:
+ *         description: Canción creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Song'
+ *                     message:
+ *                       example: "Canción creada exitosamente"
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.post('/songs', async (req, res) => {
   try {
     const { name, path, plays = 0 } = req.body;
@@ -78,7 +170,52 @@ router.post('/songs', async (req, res) => {
   }
 });
 
-// PUT /api/songs/:id - Actualizar canción
+/**
+ * @swagger
+ * /api/songs/{id}:
+ *   put:
+ *     tags: [Songs]
+ *     summary: Actualizar canción completa
+ *     description: Actualiza todos los campos de una canción existente
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID único de la canción a actualizar
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SongUpdate'
+ *           example:
+ *             name: "Stairway to Heaven (Remastered)"
+ *             path: "https://music.example.com/stairway-remastered.mp3"
+ *             plays: 3500
+ *     responses:
+ *       200:
+ *         description: Canción actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Song'
+ *                     message:
+ *                       example: "Canción actualizada exitosamente"
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.put('/songs/:id', async (req, res) => {
   try {
     const song = await Song.findByPk(req.params.id);
@@ -112,7 +249,29 @@ router.put('/songs/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/songs/:id - Eliminar canción
+/**
+ * @swagger
+ * /api/songs/{id}:
+ *   delete:
+ *     tags: [Songs]
+ *     summary: Eliminar canción
+ *     description: Elimina permanentemente una canción de la base de datos
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID único de la canción a eliminar
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       204:
+ *         description: Canción eliminada exitosamente (sin contenido)
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.delete('/songs/:id', async (req, res) => {
   try {
     const deleted = await Song.destroy({
@@ -136,7 +295,40 @@ router.delete('/songs/:id', async (req, res) => {
   }
 });
 
-// PATCH /api/songs/:id/play - Incrementar reproducciones
+/**
+ * @swagger
+ * /api/songs/{id}/play:
+ *   patch:
+ *     tags: [Songs]
+ *     summary: Incrementar reproducciones
+ *     description: Incrementa en 1 el contador de reproducciones de una canción específica
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID único de la canción
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Reproducción registrada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Song'
+ *                     message:
+ *                       example: "Reproducción registrada"
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.patch('/songs/:id/play', async (req, res) => {
   try {
     const song = await Song.findByPk(req.params.id);
