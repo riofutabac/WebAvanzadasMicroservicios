@@ -1,0 +1,44 @@
+services:
+  # Aplicación Node.js
+  app:
+    build: .
+    container_name: crud-canciones-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_CLIENT=sqlite
+      - DB_FILE=/app/data/database.sqlite
+    volumes:
+      # Volumen para persistir la base de datos SQLite
+      - ./data:/app/data
+      # Volumen para desarrollo (hot reload) - opcional
+      - ./src:/app/src
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  # Opcional: PostgreSQL para testing en local
+  postgres:
+    image: postgres:15-alpine
+    container_name: crud-canciones-db
+    environment:
+      POSTGRES_DB: canciones
+      POSTGRES_USER: canciones_user
+      POSTGRES_PASSWORD: canciones_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    profiles:
+      - postgres  # Solo se ejecuta si se especifica el profile
+
+volumes:
+  postgres_data:
