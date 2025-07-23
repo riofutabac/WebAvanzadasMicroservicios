@@ -333,4 +333,4 @@ Para reportar problemas o sugerir mejoras, crear un issue en el repositorio de G
 
 ---
 
-**Desarrollado para el laboratorio de Microservicios - Universidad del Azuay**
+**Desarrollado para el laboratorio de Microservicios**
